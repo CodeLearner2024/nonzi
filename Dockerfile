@@ -29,8 +29,11 @@ RUN groupadd --system appgroup && useradd --system --gid appgroup appuser
 
 WORKDIR /app
 
-# Dossier de données persistantes : fichier H2 + logs
-RUN mkdir -p /data/logs && chown -R appuser:appgroup /data
+# Créer les dossiers de données avec les bons droits AVANT de passer à appuser
+# /data  : volume persistant (Docker ou Render Disk) — chemin prod par défaut
+# /app/data : fallback si le volume n'est pas monté
+RUN mkdir -p /data/logs /app/data \
+    && chown -R appuser:appgroup /data /app/data
 
 # Copier le JAR depuis l'étape de build
 COPY --from=build /workspace/target/rh-app.jar app.jar
