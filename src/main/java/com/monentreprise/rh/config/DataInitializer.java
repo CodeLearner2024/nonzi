@@ -6,47 +6,34 @@ import com.monentreprise.rh.repository.RoleRepository;
 import com.monentreprise.rh.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Initialisation des données de référence au démarrage.
- * Crée les rôles ROLE_ADMIN / ROLE_USER et le compte admin par défaut
- * si aucun admin n'existe encore en base.
- *
- * Les valeurs sont lues depuis des variables d'environnement :
- *   ADMIN_USERNAME, ADMIN_EMAIL, ADMIN_PASSWORD
- * (configurées dans application.yml via ${ADMIN_*}).
+ * Initialisation au démarrage :
+ *   1. Crée les rôles ROLE_ADMIN et ROLE_USER s'ils n'existent pas.
+ *   2. Crée le compte admin (admin / admin1234) à chaque démarrage
+ *      s'il n'existe pas encore en base.
  */
 @Component
 public class DataInitializer implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
-    private static final String ROLE_ADMIN = "ROLE_ADMIN";
-    private static final String ROLE_USER  = "ROLE_USER";
+    // Rôles fixes de l'application
+    static final String ROLE_ADMIN = "ROLE_ADMIN";
+    static final String ROLE_USER  = "ROLE_USER";
+
+    // Compte admin par défaut — en dur, pas de variable d'environnement
+    private static final String ADMIN_USERNAME = "admin";
+    private static final String ADMIN_EMAIL    = "admin@rh.local";
+    private static final String ADMIN_PASSWORD = "admin1234"; // hashé par BCrypt au démarrage
 
     private final RoleRepository  roleRepository;
     private final UserRepository  userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    /** Nom d'utilisateur admin — lu depuis ${ADMIN_USERNAME} */
-    @Value("${app.security.admin-username}")
-    private String adminUsername;
-
-    /** Email admin — lu depuis ${ADMIN_EMAIL} */
-    @Value("${app.security.admin-email}")
-    private String adminEmail;
-
-    /**
-     * Mot de passe admin en clair — lu depuis ${ADMIN_PASSWORD}.
-     * Hashé immédiatement par BCrypt, jamais stocké ni loggé en clair.
-     */
-    @Value("${app.security.admin-password}")
-    private String adminPasswordClair;
 
     public DataInitializer(RoleRepository roleRepository,
                            UserRepository userRepository,
@@ -59,25 +46,21 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        // Création des rôles s'ils n'existent pas
+        // 1. Créer les rôles s'ils n'existent pas
         Role roleAdmin = creerRoleSiAbsent(ROLE_ADMIN);
         Role roleUser  = creerRoleSiAbsent(ROLE_USER);
 
-        // Création du compte admin uniquement si aucun admin n'existe
-        boolean adminExiste = userRepository.findByUsername(adminUsername)
-                .map(u -> u.aLeRole(ROLE_ADMIN))
-                .orElse(false);
-
-        if (!adminExiste) {
+        // 2. Créer le compte admin s'il n'existe pas encore
+        if (!userRepository.existsByUsername(ADMIN_USERNAME)) {
             User admin = new User();
-            admin.setUsername(adminUsername);
-            admin.setEmail(adminEmail);
-            admin.setPassword(passwordEncoder.encode(adminPasswordClair)); // BCrypt — jamais en clair
+            admin.setUsername(ADMIN_USERNAME);
+            admin.setEmail(ADMIN_EMAIL);
+            admin.setPassword(passwordEncoder.encode(ADMIN_PASSWORD)); // BCrypt
             admin.setEnabled(true);
             admin.ajouterRole(roleAdmin);
             admin.ajouterRole(roleUser);
             userRepository.save(admin);
-            log.warn(">>> Compte admin créé : '{}' — Changez le mot de passe en production !", adminUsername);
+            log.info("Compte admin créé : username='{}', email='{}'", ADMIN_USERNAME, ADMIN_EMAIL);
         }
     }
 

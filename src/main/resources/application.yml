@@ -43,15 +43,3 @@ server:
       force: true
       force-request: true
       force-response: true
-
-# =============================================================================
-# Compte admin par défaut
-# Valeurs injectées depuis les variables d'environnement (voir .env.example).
-# Aucune valeur par défaut pour le mot de passe : l'application refuse
-# de démarrer si ADMIN_PASSWORD n'est pas définie en production.
-# =============================================================================
-app:
-  security:
-    admin-username: ${ADMIN_USERNAME:admin}
-    admin-email: ${ADMIN_EMAIL:admin@rh.local}
-    admin-password: ${ADMIN_PASSWORD:Admin@1234}
