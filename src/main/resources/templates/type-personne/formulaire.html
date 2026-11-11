@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/base :: page(
+        titre=${modeCreation} ? 'Nouveau type de personne' : 'Modifier le type de personne',
+        contenu=~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<body>
+<main>
+
+    <!-- Fil d'Ariane -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a th:href="@{/types-personne}">Types de personne</a>
+            </li>
+            <li class="breadcrumb-item active"
+                th:text="${modeCreation} ? 'Nouveau' : 'Modifier'">Formulaire</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm" style="max-width:500px;">
+        <div class="card-body">
+
+            <form th:action="${modeCreation}
+                              ? @{/types-personne}
+                              : @{/types-personne/{id}(id=${typePersonneForm.id})}"
+                  th:object="${typePersonneForm}"
+                  method="post" novalidate>
+
+                <!-- Code -->
+                <div class="mb-3">
+                    <label for="code" class="form-label fw-semibold">
+                        Code <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" id="code" th:field="*{code}"
+                           class="form-control font-monospace text-uppercase"
+                           th:classappend="${#fields.hasErrors('code')} ? 'is-invalid'"
+                           placeholder="Ex : EMP" maxlength="20" autofocus>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('code')}">
+                        <span th:errors="*{code}"></span>
+                    </div>
+                    <div class="form-text">Maximum 20 caractères, sans espaces.</div>
+                </div>
+
+                <!-- Désignation -->
+                <div class="mb-4">
+                    <label for="designation" class="form-label fw-semibold">
+                        Désignation <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" id="designation" th:field="*{designation}"
+                           class="form-control"
+                           th:classappend="${#fields.hasErrors('designation')} ? 'is-invalid'"
+                           placeholder="Ex : Employé" maxlength="100">
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('designation')}">
+                        <span th:errors="*{designation}"></span>
+                    </div>
+                </div>
+
+                <!-- Boutons -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn"
+                            th:classappend="${modeCreation} ? 'btn-primary' : 'btn-warning'">
+                        <i class="bi bi-save me-1"></i>
+                        <span th:text="${modeCreation} ? 'Créer' : 'Enregistrer'">Enregistrer</span>
+                    </button>
+                    <a th:href="@{/types-personne}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Annuler
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/base :: page(titre='Types de personne', contenu=~{::main})}"
+      xmlns:th="http://www.thymeleaf.org">
+<body>
+<main>
+
+    <!-- ── Barre de recherche + bouton Nouveau ──────────────────────── -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+
+        <form th:action="@{/types-personne}" method="get" class="d-flex gap-2">
+            <input type="text" name="motCle" th:value="${motCle}"
+                   class="form-control form-control-sm"
+                   placeholder="Rechercher par code ou désignation…"
+                   style="max-width:300px">
+            <button class="btn btn-sm btn-outline-secondary" type="submit">
+                <i class="bi bi-search"></i>
+            </button>
+            <a th:href="@{/types-personne}"
+               class="btn btn-sm btn-outline-danger"
+               th:if="${motCle != null and !#strings.isEmpty(motCle)}"
+               title="Effacer la recherche">
+                <i class="bi bi-x-lg"></i>
+            </a>
+        </form>
+
+        <a th:href="@{/types-personne/nouveau}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle me-1"></i>Nouveau type
+        </a>
+    </div>
+
+    <!-- ── État vide ────────────────────────────────────────────────── -->
+    <div th:if="${types.isEmpty()}" class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size:3rem;"></i>
+            <p class="text-muted mt-3 mb-3">Aucun type de personne enregistré.</p>
+            <a th:href="@{/types-personne/nouveau}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i>Créer le premier type
+            </a>
+        </div>
+    </div>
+
+    <!-- ── Tableau ───────────────────────────────────────────────────── -->
+    <div class="card shadow-sm" th:unless="${types.isEmpty()}">
+        <div class="card-body p-0">
+            <table class="table table-hover table-striped mb-0 align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width:160px;">Code</th>
+                        <th>Désignation</th>
+                        <th class="text-end" style="width:180px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="type : ${types}">
+                        <td>
+                            <span class="badge bg-primary fs-6 font-monospace"
+                                  th:text="${type.code}">CODE</span>
+                        </td>
+                        <td th:text="${type.designation}">Désignation</td>
+                        <td class="text-end">
+
+                            <!-- Bouton Modifier -->
+                            <a th:href="@{/types-personne/{id}/modifier(id=${type.id})}"
+                               class="btn btn-sm btn-outline-primary me-1"
+                               title="Modifier">
+                                <i class="bi bi-pencil me-1"></i>Modifier
+                            </a>
+
+                            <!-- Bouton Supprimer — ouvre le modal de confirmation -->
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#confirmDeleteModal"
+                                    th:data-id="${type.id}"
+                                    th:data-code="${type.code}"
+                                    title="Supprimer">
+                                <i class="bi bi-trash me-1"></i>Supprimer
+                            </button>
+
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="card-footer d-flex flex-wrap justify-content-between align-items-center gap-2"
+             th:if="${types.totalPages > 1}">
+            <small class="text-muted">
+                Page <strong th:text="${types.number + 1}">1</strong>
+                sur <strong th:text="${types.totalPages}">1</strong>
+                — <span th:text="${types.totalElements}">0</span> résultat(s)
+            </small>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" th:classappend="${types.first} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/types-personne(motCle=${motCle},page=${types.number-1},taille=${taille})}">&laquo;</a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(0, types.totalPages - 1)}"
+                        class="page-item"
+                        th:classappend="${i == types.number} ? 'active'">
+                        <a class="page-link"
+                           th:href="@{/types-personne(motCle=${motCle},page=${i},taille=${taille})}"
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${types.last} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/types-personne(motCle=${motCle},page=${types.number+1},taille=${taille})}">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+            <form th:action="@{/types-personne}" method="get"
+                  class="d-flex align-items-center gap-1">
+                <input type="hidden" name="motCle" th:value="${motCle}">
+                <label class="form-label mb-0 small text-muted">Lignes :</label>
+                <select name="taille" class="form-select form-select-sm w-auto"
+                        onchange="this.form.submit()">
+                    <option th:each="t : ${#numbers.sequence(5,25,5)}"
+                            th:value="${t}" th:text="${t}"
+                            th:selected="${t == taille}">10</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================================================================
+         MODAL DE CONFIRMATION DE SUPPRESSION
+         ================================================================
+         IMPORTANT : le formulaire utilise th:action pour que Thymeleaf
+         injecte automatiquement le jeton CSRF (champ _csrf hidden).
+         L'id réel est placé dans un champ caché #deleteId mis à jour
+         par le script ci-dessous au moment de l'ouverture du modal.
+         ================================================================ -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1"
+         aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmer la suppression
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white"
+                            data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="mb-1">
+                        Êtes-vous sûr de vouloir supprimer le type
+                        <strong id="modalCodeLabel" class="text-danger font-monospace"></strong> ?
+                    </p>
+                    <small class="text-muted">Cette action est irréversible.</small>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Annuler
+                    </button>
+
+                    <!--
+                        th:action génère l'URL ET injecte le champ _csrf.
+                        On pointe sur l'id 0 par défaut ; le JS remplace
+                        la valeur du champ caché #deleteId avant la soumission.
+                    -->
+                    <form id="deleteForm"
+                          th:action="@{/types-personne/0/supprimer}"
+                          method="post">
+                        <!-- Champ caché : l'id réel est injecté par le script -->
+                        <input type="hidden" id="deleteId" name="_id_placeholder" value="0">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i>Supprimer
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!--
+        Script de configuration du modal.
+        Récupère l'id et le code depuis les data-attributes du bouton cliqué,
+        met à jour l'action du formulaire et affiche le code dans le message.
+        Thymeleaf inline javascript permet d'utiliser @{} pour le context-path.
+    -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        (function () {
+            var modal = document.getElementById('confirmDeleteModal');
+            if (!modal) return;
+
+            // Préfixe de contexte (vide si l'app est à la racine)
+            var contextPath = /*[[@{/}]]*/ '/';
+            // Normaliser : supprimer le slash final si présent
+            if (contextPath.endsWith('/')) {
+                contextPath = contextPath.slice(0, -1);
+            }
+
+            modal.addEventListener('show.bs.modal', function (event) {
+                var button   = event.relatedTarget;
+                var id       = button.getAttribute('data-id');
+                var code     = button.getAttribute('data-code');
+
+                // Afficher le code dans le corps du modal
+                document.getElementById('modalCodeLabel').textContent = code;
+
+                // Mettre à jour l'action du formulaire avec l'URL correcte
+                var form = document.getElementById('deleteForm');
+                form.action = contextPath + '/types-personne/' + id + '/supprimer';
+            });
+        })();
+        /*]]>*/
+    </script>
+
+</main>
+</body>
+</html>

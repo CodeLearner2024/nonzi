@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<!--
+    LAYOUT PRINCIPAL — layout/base.html
+    ════════════════════════════════════
+    Usage dans une vue fille :
+
+      <!DOCTYPE html>
+      <html th:replace="~{layout/base :: page(titre='Mon titre', contenu=~{::main})}">
+      <body>
+        <main>... contenu spécifique à la page ...</main>
+      </body>
+      </html>
+
+    Le fragment remplace entièrement le <html> de la vue fille,
+    ce qui garantit que le <head> avec Bootstrap est toujours présent.
+-->
+<html lang="fr"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="page(titre, contenu)">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titre} + ' — RH Application'">RH Application</title>
+
+    <!--
+        Bootstrap 5.3.3 — servi localement via WebJars (pas de CDN).
+        webjars-locator-core résout la version automatiquement :
+          @{/webjars/bootstrap/css/bootstrap.min.css}
+          → /webjars/bootstrap/5.3.3/css/bootstrap.min.css
+    -->
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.css}">
+
+    <!-- Styles personnalisés -->
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<body>
+
+    <!-- =================================================================
+         NAVBAR DU HAUT (sticky)
+         ================================================================= -->
+    <nav class="navbar topbar sticky-top shadow-sm px-3">
+
+        <!-- Burger desktop : replie/déplie la sidebar -->
+        <button class="btn btn-sm btn-outline-secondary me-2 d-none d-lg-inline-flex"
+                id="sidebarToggleDesktop"
+                aria-label="Basculer le menu">
+            <i class="bi bi-list fs-5"></i>
+        </button>
+
+        <!-- Burger mobile : ouvre l'offcanvas -->
+        <button class="btn btn-sm btn-outline-secondary me-2 d-lg-none"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasSidebar"
+                aria-controls="offcanvasSidebar"
+                aria-label="Ouvrir le menu">
+            <i class="bi bi-list fs-5"></i>
+        </button>
+
+        <!-- Nom de l'application -->
+        <a class="navbar-brand" th:href="@{/dashboard}">
+            <i class="bi bi-people-fill text-primary me-1"></i>RH Application
+        </a>
+
+        <!-- Droite : utilisateur connecté + déconnexion -->
+        <div class="ms-auto d-flex align-items-center gap-2">
+            <span class="d-none d-sm-inline text-muted small">
+                <i class="bi bi-person-circle me-1"></i>
+                <sec:authentication property="name"/>
+                <span sec:authorize="hasRole('ADMIN')"
+                      class="badge bg-danger ms-1"
+                      style="font-size:0.65rem;">Admin</span>
+            </span>
+
+            <!-- Déconnexion — POST avec jeton CSRF (injecté par Thymeleaf) -->
+            <form th:action="@{/logout}" method="post" class="d-inline m-0">
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span class="d-none d-sm-inline ms-1">Déconnexion</span>
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- =================================================================
+         WRAPPER : sidebar desktop (≥ lg) + contenu principal
+         ================================================================= -->
+    <div class="app-wrapper">
+
+        <!-- SIDEBAR DESKTOP — visible uniquement sur ≥ lg -->
+        <aside id="sidebar" class="d-none d-lg-flex flex-column">
+            <th:block th:replace="~{layout/sidebar :: menu}"></th:block>
+        </aside>
+
+        <!-- OFFCANVAS SIDEBAR MOBILE — pour < lg uniquement -->
+        <div class="offcanvas offcanvas-start"
+             tabindex="-1"
+             id="offcanvasSidebar"
+             aria-labelledby="offcanvasSidebarLabel">
+            <div class="offcanvas-header">
+                <span class="fw-bold text-white" id="offcanvasSidebarLabel">
+                    <i class="bi bi-people-fill me-2"></i>RH Application
+                </span>
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="offcanvas"
+                        aria-label="Fermer"></button>
+            </div>
+            <div class="offcanvas-body p-0">
+                <th:block th:replace="~{layout/sidebar :: menu}"></th:block>
+            </div>
+        </div>
+
+        <!-- CONTENU PRINCIPAL -->
+        <div id="main-content">
+
+            <!-- Messages flash -->
+            <div class="px-3 pt-3">
+                <div th:if="${flashSucces}"
+                     class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span th:text="${flashSucces}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                </div>
+                <div th:if="${flashErreur}"
+                     class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <span th:text="${flashErreur}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                </div>
+            </div>
+
+            <!-- Zone de contenu -->
+            <div class="page-content">
+                <h1 class="page-title" th:text="${titre}">Page</h1>
+                <th:block th:replace="${contenu}"></th:block>
+            </div>
+
+            <!-- Footer -->
+            <footer class="app-footer">
+                &copy; 2026 RH Application &mdash; Tous droits réservés
+            </footer>
+        </div>
+
+    </div><!-- /.app-wrapper -->
+
+    <!-- Bootstrap JS Bundle (Popper inclus) — WebJar local -->
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+    <!-- Comportement sidebar desktop -->
+    <script>
+        (function () {
+            var btn     = document.getElementById('sidebarToggleDesktop');
+            var sidebar = document.getElementById('sidebar');
+            if (btn && sidebar) {
+                btn.addEventListener('click', function () {
+                    sidebar.classList.toggle('collapsed');
+                });
+            }
+
+            // Ouvrir le groupe Paramètres si un lien actif s'y trouve
+            document.querySelectorAll('.sidebar-nav .collapse').forEach(function (el) {
+                if (el.querySelector('.nav-link.active')) {
+                    new bootstrap.Collapse(el, { toggle: false }).show();
+                }
+            });
+        })();
+    </script>
+
+</body>
+</html>

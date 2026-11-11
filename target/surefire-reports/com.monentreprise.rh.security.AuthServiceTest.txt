@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.monentreprise.rh.security.AuthServiceTest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.518 s -- in com.monentreprise.rh.security.AuthServiceTest

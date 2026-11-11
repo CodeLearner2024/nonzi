@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<!--
+    Fragment de navigation latérale.
+    Inclus dans layout/base.html via : th:replace="~{layout/sidebar :: menu}"
+
+    La variable ${requestUri} est injectée par RequestUriInterceptor (config/).
+
+    ═══════════════════════════════════════════════════════════════
+    AJOUTER UN NOUVEAU MODULE — guide rapide
+    ───────────────────────────────────────
+    ► Lien simple (ex: Employés sur /employes) :
+        <a th:href="@{/employes}" class="nav-link"
+           th:classappend="${requestUri != null and
+               #strings.startsWith(requestUri,'/employes')} ? 'active'">
+            <i class="bi bi-person-badge me-2"></i>Employés
+        </a>
+
+    ► Dans un groupe déroulant existant (ex: Paramètres) :
+        → Ajouter un <a> supplémentaire dans le div.collapse#group-parametres
+
+    ► Nouveau groupe déroulant :
+        <span class="sidebar-section-label">Mon groupe</span>
+        <button class="nav-group-btn" type="button"
+                data-bs-toggle="collapse" data-bs-target="#group-monModule"
+                aria-expanded="false" aria-controls="group-monModule">
+            <i class="bi bi-mon-icone me-2"></i>Mon module
+            <i class="bi bi-chevron-down chevron"></i>
+        </button>
+        <div class="collapse sidebar-sub-menu" id="group-monModule">
+            <a th:href="@{/ma-route}" class="nav-link" ...>...</a>
+        </div>
+    ═══════════════════════════════════════════════════════════════
+-->
+
+<nav th:fragment="menu" class="sidebar-nav d-flex flex-column">
+
+    <!-- ── Tableau de bord ───────────────────────────────────── -->
+    <a th:href="@{/dashboard}" class="nav-link mt-1"
+       th:classappend="${requestUri != null and
+           (requestUri == '/dashboard' or requestUri == '/')} ? 'active'">
+        <i class="bi bi-speedometer2 me-2"></i>Tableau de bord
+    </a>
+
+    <hr class="sidebar-divider">
+
+    <!-- ── Groupe : Paramètres ───────────────────────────────── -->
+    <span class="sidebar-section-label">Paramètres</span>
+
+    <button class="nav-group-btn" type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#group-parametres"
+            aria-expanded="false"
+            aria-controls="group-parametres">
+        <i class="bi bi-gear me-2"></i>Paramètres
+        <i class="bi bi-chevron-down chevron"></i>
+    </button>
+
+    <div class="collapse sidebar-sub-menu" id="group-parametres">
+
+        <!-- Utilisateurs : ADMIN uniquement -->
+        <a sec:authorize="hasRole('ADMIN')"
+           th:href="@{/users}" class="nav-link"
+           th:classappend="${requestUri != null and
+               #strings.startsWith(requestUri,'/users')} ? 'active'">
+            <i class="bi bi-people me-2"></i>Utilisateurs
+        </a>
+
+        <!-- Types de personne -->
+        <a th:href="@{/types-personne}" class="nav-link"
+           th:classappend="${requestUri != null and
+               #strings.startsWith(requestUri,'/types-personne')} ? 'active'">
+            <i class="bi bi-tags me-2"></i>Types de personne
+        </a>
+
+        <!-- ➕ Insérer ici les prochains éléments du groupe Paramètres -->
+        <!-- Exemple : Départements, Postes, Sites, etc.               -->
+
+    </div>
+
+    <!-- ── Prochains groupes (à décommenter module par module) ── -->
+
+    <!--
+    <hr class="sidebar-divider">
+    <span class="sidebar-section-label">Personnel</span>
+
+    <a th:href="@{/employes}" class="nav-link"
+       th:classappend="${requestUri != null and
+           #strings.startsWith(requestUri,'/employes')} ? 'active'">
+        <i class="bi bi-person-badge me-2"></i>Employés
+    </a>
+    -->
+
+    <!--
+    <hr class="sidebar-divider">
+    <span class="sidebar-section-label">RH</span>
+
+    <a th:href="@{/conges}" class="nav-link" ...>
+        <i class="bi bi-calendar-check me-2"></i>Congés
+    </a>
+    <a th:href="@{/paie}" class="nav-link" ...>
+        <i class="bi bi-cash-stack me-2"></i>Paie
+    </a>
+    -->
+
+</nav>
+
+</body>
+</html>

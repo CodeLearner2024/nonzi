@@ -1,0 +1,4 @@
+com\monentreprise\rh\security\AuthServiceTest.class
+com\monentreprise\rh\controller\TypePersonneControllerTest.class
+com\monentreprise\rh\security\SecurityAccessTest.class
+com\monentreprise\rh\service\TypePersonneServiceTest.class

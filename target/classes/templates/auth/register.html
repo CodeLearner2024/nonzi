@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Inscription — RH Application</title>
+
+    <!-- Bootstrap 5 local (WebJar) -->
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+    <!-- Bootstrap Icons local (WebJar) -->
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.css}">
+
+    <style>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1e2a38 0%, #0d6efd 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .register-card {
+            width: 100%;
+            max-width: 460px;
+            border-radius: 1rem;
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.35);
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="register-card card border-0 p-4">
+
+    <div class="text-center mb-4">
+        <i class="bi bi-person-plus-fill text-primary" style="font-size:2.5rem;"></i>
+        <h1 class="h4 mt-2 fw-bold">Créer un compte</h1>
+        <p class="text-muted small mb-0">RH Application</p>
+    </div>
+
+    <form th:action="@{/register}" th:object="${registerForm}" method="post" novalidate>
+
+        <!-- Nom d'utilisateur -->
+        <div class="mb-3">
+            <label for="username" class="form-label fw-semibold">
+                Nom d'utilisateur <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text"
+                       id="username"
+                       th:field="*{username}"
+                       class="form-control"
+                       th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'"
+                       placeholder="3 à 50 caractères"
+                       autocomplete="username"
+                       autofocus>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('username')}">
+                    <span th:errors="*{username}"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+            <label for="email" class="form-label fw-semibold">
+                Email <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input type="email"
+                       id="email"
+                       th:field="*{email}"
+                       class="form-control"
+                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
+                       placeholder="votre@email.com"
+                       autocomplete="email">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}">
+                    <span th:errors="*{email}"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mot de passe -->
+        <div class="mb-3">
+            <label for="password" class="form-label fw-semibold">
+                Mot de passe <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input type="password"
+                       id="password"
+                       th:field="*{password}"
+                       class="form-control"
+                       th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                       placeholder="Au moins 8 caractères"
+                       autocomplete="new-password">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}">
+                    <span th:errors="*{password}"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation mot de passe -->
+        <div class="mb-4">
+            <label for="confirmPassword" class="form-label fw-semibold">
+                Confirmer le mot de passe <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                <input type="password"
+                       id="confirmPassword"
+                       th:field="*{confirmPassword}"
+                       class="form-control"
+                       th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"
+                       placeholder="Répétez le mot de passe"
+                       autocomplete="new-password">
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('confirmPassword')}">
+                    <span th:errors="*{confirmPassword}"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-person-check me-2"></i>S'inscrire
+            </button>
+        </div>
+    </form>
+
+    <hr class="my-3">
+
+    <p class="text-center text-muted small mb-0">
+        Déjà un compte ?
+        <a th:href="@{/login}" class="text-decoration-none fw-semibold">Se connecter</a>
+    </p>
+</div>
+
+<!-- Bootstrap JS Bundle local (WebJar) -->
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

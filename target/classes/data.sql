@@ -1,0 +1,6 @@
+-- data.sql — données initiales au démarrage
+-- Les rôles (ROLE_ADMIN, ROLE_USER) et le compte admin sont créés
+-- par DataInitializer.java (CommandLineRunner), pas ici.
+--
+-- Les données TypePersonne ont été supprimées : la liste démarre vide,
+-- l'utilisateur crée ses propres types via l'interface.
