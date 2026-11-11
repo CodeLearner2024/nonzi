@@ -1,0 +1,40 @@
+# =============================================================================
+# application-dev.yml — Profil développement
+# Activé par : SPRING_PROFILES_ACTIVE=dev  (valeur par défaut)
+# =============================================================================
+
+spring:
+  datasource:
+    url: jdbc:h2:file:./data/rhdb-dev;AUTO_SERVER=TRUE;NON_KEYWORDS=USER
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  h2:
+    console:
+      enabled: true       # http://localhost:8222/h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: update    # Hibernate gère le schéma en dev
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: false        # Flyway désactivé en dev (Hibernate gère le schéma)
+
+  sql:
+    init:
+      mode: never
+
+  thymeleaf:
+    cache: false
+
+# Compte admin dev (valeurs par défaut pratiques — PAS pour la prod)
+app:
+  security:
+    admin-username: ${ADMIN_USERNAME:admin}
+    admin-email: ${ADMIN_EMAIL:admin@rh.local}
+    admin-password: ${ADMIN_PASSWORD:Admin@1234dev}

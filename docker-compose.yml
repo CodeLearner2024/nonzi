@@ -1,0 +1,50 @@
+# =============================================================================
+# docker-compose.yml — Déploiement production de l'application RH
+#
+# UTILISATION :
+#   cp .env.example .env && nano .env   # Remplir les secrets
+#   docker compose up -d --build
+#
+# MISE À JOUR :
+#   docker compose pull && docker compose up -d --build
+#   (le volume rh-data est conservé — les données persistent)
+# =============================================================================
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rh-app:latest
+    container_name: rh-application
+    restart: unless-stopped
+
+    # Charger toutes les variables depuis le fichier .env
+    env_file: .env
+
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+
+    # Écouter uniquement sur localhost — le proxy Nginx expose 80/443
+    ports:
+      - "127.0.0.1:8222:8222"
+
+    # Volume persistant pour le fichier H2 et les logs
+    volumes:
+      - rh-data:/data
+
+    # Healthcheck : vérifie que l'actuator répond
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8222/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+    # Arrêt propre : attend 30 s max pour finir les requêtes en cours
+    stop_grace_period: 30s
+
+# Volume nommé Docker : persiste entre les recréations du conteneur
+volumes:
+  rh-data:
+    driver: local

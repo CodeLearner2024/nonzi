@@ -64,6 +64,8 @@ public class SecurityConfig {
                     "/css/**", "/js/**", "/images/**",
                     "/webjars/**", "/favicon.ico"
                 ).permitAll()
+                // Actuator health (accessible sans auth pour le healthcheck Docker)
+                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                 // Console H2 (dev uniquement — à supprimer en production)
                 .requestMatchers("/h2-console/**").permitAll()
                 // Zone admin

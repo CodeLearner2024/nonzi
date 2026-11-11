@@ -1,0 +1,13 @@
+target/
+.git/
+.gitignore
+.env
+*.log
+*.mv.db
+*.trace.db
+data/
+docker-compose*.yml
+nginx/
+backup*.zip
+backup*.sql
+README.md

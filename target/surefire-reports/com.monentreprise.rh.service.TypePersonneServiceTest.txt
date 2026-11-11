@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.monentreprise.rh.service.TypePersonneServiceTest
--------------------------------------------------------------------------------
-Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.210 s -- in com.monentreprise.rh.service.TypePersonneServiceTest

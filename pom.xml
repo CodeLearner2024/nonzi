@@ -114,6 +114,18 @@
             <artifactId>webjars-locator-core</artifactId>
             <version>0.59</version>
         </dependency>
+
+        <!-- Spring Boot Actuator (healthcheck, /actuator/health) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Flyway — migrations SQL versionnées -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -122,6 +134,8 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <!-- Nom du JAR final : rh-app.jar (prévisible pour le Dockerfile) -->
+                    <finalName>rh-app</finalName>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
